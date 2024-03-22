@@ -1,51 +1,32 @@
 # Generic Experiment Name
 
-**Fill EXP.VAR directories as follows:**
-
-	- CONFIG : material for NEMO compilation
-	- INFERENCES : python and eophis material
-	- RUN : material for production
-	- POSTPROCESS : material for post-processing and plotting
-	- RES : some pertinent results
-
-**Replace `highligthed content` below to fill the README template**
-
 ## Context and Motivation
 
-`Description of the experiment`
+[A DIabatic NeverwOrld2](https://github.com/vopikamm/DINO) coupled with external Python models.
 
 #### Variations
-`- VAR0 : description of experiment variation VAR0`
-
-`- VAR1 : ...`
+`- DINO : description of experiment variation VAR0`
 
 ## Requirements
 
-**This part must list libraries versions and codes patches used to run the experiments and facilitates reproducibility.
-If one of the experiment variations needs a different software environment, please create another repository from this template.**
-
 ### Compilation
 
-- NEMO version : `[release](<commit_link>)`
+- NEMO version : [v4.2.1](https://forge.nemo-ocean.eu/nemo/nemo/-/releases/4.2.1) patched with [morays](https://github.com/morays-community/morays-doc/tree/main/nemo_src) and local `CONFIG/my_src` sources.
 
-- `Code Compilation manager if used : [release](<commit_link>)`
-
-- `Customized sources : YES/NO`
+- Code Compilation manager : standard `makenemo` script
 
 
 ### Python
 
-- Eophis version : `[release](<commit_link>)`
+- Eophis version : [v0.9.0-beta](https://github.com/alexis-barge/eophis/tree/v0.9.0-beta)
 
 
 ### Run
 
-- `NEMO Production Manager if used : [release](<commit_link>)`
+- NEMO Production Manager : submission script `job.ksh` in `RUN`
 
 
 ### Post-Process
 
-- `Post-Process libraries if used : [release](<commit_link>)`
-  
-- `Plotting libraries if used : [release](<commit_link>)`
+- Empty
 
