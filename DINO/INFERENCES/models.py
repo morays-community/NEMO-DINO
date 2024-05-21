@@ -1,46 +1,59 @@
-"""
-Contains User Inference/Analytic Models.
-
-A model must fit the following requisites and structure :
---------------------------------------------------------
-    1. must be a callable function that takes N numpy arrays as inputs
-    2. /!\ returns N None for the N awaited outputs if at least one of the input is None /!\
-    3. inputs may be freely formatted and transformed into what you want BUT...
-    4. ...outputs must be formatted as numpy array for sending back
-"""
 import numpy as np
-import gsw
+import sys
+import torch
 
-# --------- utils ---------- #
+
+sys.path.append('./gz21_ocean_momentum/src/')
+
+from gz21_ocean_momentum.models.fully_conv_net import FullyCNN
+import gz21_ocean_momentum.models.transforms as transforms
+import gz21_ocean_momentum.train.losses as loss_funcs
+#import submeso_ml.systems.regression_system as regression_system
+#import submeso_ml.models.fcnn as fcnn
+#import submeso_ml.data.dataset as dataset
+
+
+# ============================= #
+# -- User Defined Parameters --
+# ============================= #
+
+# use GPUs if available
+if torch.cuda.is_available():
+    print("CUDA Available")
+    device = torch.device('cuda')
+else:
+    print('CUDA Not Available')
+    device = torch.device('cpu')
+
+
+#       Utils 
+# -----------------
 def Is_None(*inputs):
     """ Test presence of at least one None in inputs """
     return any(item is None for item in inputs)
 
-# ============================ #
-#     Stanley et al. 2020      #
-# ============================ #
-def stanley_terms(T,S):
-    """ Compute d2 rho(T,S) / dTdT """
-    der = gsw.rho_second_derivatives(S,T,np.zeros_like(T))
-    return der[2] / 2.0
-
-
-# sigmaT = c * |lx_i · dT/dx_i|**2
-def Std_Stanley(T, S, mask_u, mask_v, c=0.1):
-    """ Computation of Stanley et al. (2020) model with analytical methods """
-    if Is_None(T,S):
+#       Main Model Routines
+# ------------------------------
+def momentum_cnn(u, v):
+    """ Take as input u and v fields and return corrected fields using GZ (2021)  """
+    if Is_None([u, v]):
         return None
     else:
-        dTdx  = np.diff(T, axis=0, append=T[-1:,:,:]) * mask_u
-        dTdx = dTdx + np.diff(T,axis=0, prepend=T[0:1,:,:]) * np.roll(mask_u, 1, axis=0)
-        wght = mask_u + np.roll(mask_u, 1, axis=0)
-        wght[ wght == 0 ] = 1
-        dTdx = dTdx / wght
-        
-        dTdy = np.diff(T, axis=1, append=T[:,-1:,:]) * mask_v
-        dTdy = dTdy + np.diff(T,axis=1, prepend=T[:,0:1,:]) * np.roll(mask_v, 1, axis=1)
-        wght = mask_v + np.roll(mask_v, 1, axis=1)
-        wght[(wght == 0)] = 1
-        dTdy = dTdy / wght
-        
-        return stanley_terms(T,S) * c * ( dTdx**2 + dTdy**2 )
+        inputs = torch.stack([u, v])[None]
+        net = FullyCNN(2, 4, padding='same')
+        transformation = transforms.SoftPlusTransform()
+        transformation.indices = [2, 3] # What to put here ? 
+        net.final_transformation = transformation
+        r = net(inputs)
+        Su_mu, Sv_mu, Su_std, Sv_std = r[0, 0], r[0, 1], r[0, 2], r[0, 3]
+        u_c = Su_mu + Su_std*torch.randn_like(Su_std)
+        v_c = Sv_mu + Su_std*torch.randn_like(Sv_std)
+        return u+u_c, v+v_c
+    
+
+
+if __name__ == '__main__' : 
+    u = torch.rand(120, 100)
+    v = torch.rand(120, 100)
+    n_u, n_v = momentum_cnn(u, v)
+    print(f'Returned n_u : {n_u.shape} n_v : {n_v.shape}')
