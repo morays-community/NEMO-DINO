@@ -34,13 +34,15 @@ def Is_None(*inputs):
 
 #       Main Model Routines
 # ------------------------------
+@torch.no_grad()
 def momentum_cnn(u, v):
     """ Take as input u and v fields and return corrected fields using GZ (2021)  """
     if Is_None([u, v]):
         return None
     else:
+        u, v = torch.tensor(u), torch.tensor(v)
         inputs = torch.stack([u, v])[None]
-        net = FullyCNN(2, 4, padding='same')
+        net = FullyCNN(2, 4, padding='same').eval()
         transformation = transforms.SoftPlusTransform()
         transformation.indices = [2, 3] # What to put here ? 
         net.final_transformation = transformation
@@ -48,12 +50,12 @@ def momentum_cnn(u, v):
         Su_mu, Sv_mu, Su_std, Sv_std = r[0, 0], r[0, 1], r[0, 2], r[0, 3]
         u_c = Su_mu + Su_std*torch.randn_like(Su_std)
         v_c = Sv_mu + Su_std*torch.randn_like(Sv_std)
-        return u+u_c, v+v_c
+        return (u+u_c).numpy(), (v+v_c).numpy()
     
 
 
 if __name__ == '__main__' : 
-    u = torch.rand(120, 100)
-    v = torch.rand(120, 100)
+    u = np.random.rand(120, 100).astype('float32')
+    v = np.random.rand(120, 100).astype('float32')
     n_u, n_v = momentum_cnn(u, v)
     print(f'Returned n_u : {n_u.shape} n_v : {n_v.shape}')
