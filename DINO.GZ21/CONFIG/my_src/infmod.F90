@@ -31,14 +31,15 @@ MODULE infmod
    PUBLIC inferences         ! routine called in stpmlf.F90
    PUBLIC inferences_final   ! routine called in nemogcm.F90
 
-   INTEGER, PARAMETER ::   jps_st = 1    ! sea temperature
-   INTEGER, PARAMETER ::   jps_ss = 2    ! sea salinity
+   INTEGER, PARAMETER ::   jps_ssu = 1    ! u surface velocity
+   INTEGER, PARAMETER ::   jps_ssv = 2    ! v surface velocity
    INTEGER, PARAMETER ::   jps_mu = 3    ! u mask
    INTEGER, PARAMETER ::   jps_mv = 4    ! u mask
    INTEGER, PARAMETER ::   jps_inf = 4   ! total number of sendings for inferences
 
-   INTEGER, PARAMETER ::   jpr_rho = 1   ! density inferences-computed
-   INTEGER, PARAMETER ::   jpr_inf = 1   ! total number of inference receptions
+   INTEGER, PARAMETER ::   jpr_uf = 1    ! u subgrid forcing field
+   INTEGER, PARAMETER ::   jpr_vf = 2    ! v subgrid forcing field
+   INTEGER, PARAMETER ::   jpr_inf = 2   ! total number of inference receptions
 
    INTEGER, PARAMETER ::   jpinf = MAX(jps_inf,jpr_inf) ! Maximum number of exchanges
 
@@ -153,24 +154,33 @@ CONTAINS
          !      Kenigson et al. (2022)      !
          ! -------------------------------- !
 
-         ! sending of sea surface temparature
-         ssnd(ntypinf,jps_st)%clname = 'E_OUT_0'
-         ssnd(ntypinf,jps_st)%laction = .TRUE.
+         ! sending of sea surface U velocity
+         ssnd(ntypinf,jps_ssu)%clname = 'E_OUT_0'
+         ssnd(ntypinf,jps_ssu)%laction = .TRUE.
+         ssnd(ntypinf,jps_ssu)%clgrid = 'U'
 
-         ! sending of sea surface salinity
-         ssnd(ntypinf,jps_ss)%clname = 'E_OUT_1'
-         ssnd(ntypinf,jps_ss)%laction = .TRUE.
+         ! sending of sea surface V velocity
+         ssnd(ntypinf,jps_ssv)%clname = 'E_OUT_1'
+         ssnd(ntypinf,jps_ssv)%laction = .TRUE.
+         ssnd(ntypinf,jps_ssv)%clgrid = 'V'
 
          ! sending of u-grid and v-grid masks
          ssnd(ntypinf,jps_mu)%clname = 'E_OUT_2'
          ssnd(ntypinf,jps_mu)%laction = .TRUE.
+         ssnd(ntypinf,jps_mu)%clgrid = 'U'
 
          ssnd(ntypinf,jps_mv)%clname = 'E_OUT_3'
          ssnd(ntypinf,jps_mv)%laction = .TRUE.
+         ssnd(ntypinf,jps_mv)%clgrid = 'V'
 
-         ! reception of sea surface density
-         srcv(ntypinf,jpr_rho)%clname = 'E_IN_0'
-         srcv(ntypinf,jpr_rho)%laction = .TRUE.
+         ! reception of u-grid and v-grid subgrid forcing fields
+         srcv(ntypinf,jpr_uf)%clname = 'E_IN_0'
+         srcv(ntypinf,jpr_uf)%laction = .TRUE.
+         srcv(ntypinf,jpr_uf)%clgrid = 'U'
+
+         srcv(ntypinf,jpr_vf)%clname = 'E_IN_1'
+         srcv(ntypinf,jpr_vf)%laction = .TRUE.
+         srcv(ntypinf,jpr_vf)%clgrid = 'V'
 
          ! ------------------------------ !
          ! ------------------------------ !
@@ -211,14 +221,14 @@ CONTAINS
       !
       ! ------  Prepare data to send ------
       !
-      ! Sea Surface Temperature
-      IF( ssnd(ntypinf,jps_st)%laction ) THEN
-         infsnd(jps_st)%z3(:,:,1:ssnd(ntypinf,jps_st)%nlvl) = ts(:,:,1:ssnd(ntypinf,jps_st)%nlvl,jp_tem,Kmm)
+      ! Sea Surface U velocity
+      IF( ssnd(ntypinf,jps_ssu)%laction ) THEN
+         infsnd(jps_ssu)%z3(:,:,1:ssnd(ntypinf,jps_ssu)%nlvl) = uu(:,:,1:ssnd(ntypinf,jps_ssu)%nlvl,Kmm)
       ENDIF  
-      !s
-      ! Sea Surface Salinity
-      IF( ssnd(ntypinf,jps_ss)%laction ) THEN
-         infsnd(jps_ss)%z3(:,:,1:ssnd(ntypinf,jps_ss)%nlvl) = ts(:,:,1:ssnd(ntypinf,jps_ss)%nlvl,jp_sal,Kmm)
+      !
+      ! Sea Surface V velocity
+      IF( ssnd(ntypinf,jps_ssv)%laction ) THEN
+         infsnd(jps_ssv)%z3(:,:,1:ssnd(ntypinf,jps_ssv)%nlvl) = vv(:,:,1:ssnd(ntypinf,jps_ssv)%nlvl,Kmm) 
       ENDIF
       !
       ! u-grid surface mask
@@ -255,10 +265,14 @@ CONTAINS
       !
       ! ------ Distribute receptions  ------
       !
-      ! Sea Surface density
-      IF( srcv(ntypinf,jpr_rho)%laction ) THEN
-         tmp_inf_2D(:,:) = infrcv(jpr_rho)%z3(:,:,1)
-         CALL iom_put( 'St_rho_2D', tmp_inf_2D(:,:) )
+      ! Subgrid forcing fields
+      IF( srcv(ntypinf,jpr_uf)%laction .AND. srcv(ntypinf,jpr_vf)%laction ) THEN
+         ext_uf(:,:) = infrcv(jpr_uf)%z3(:,:,1)
+         ext_vf(:,:) = infrcv(jpr_vf)%z3(:,:,1)
+
+         ! Write in output file 
+         CALL iom_put( 'ext_uf', ext_uf )
+         CALL iom_put( 'ext_vf', ext_vf )
       ENDIF
       !
       IF( ln_timing )   CALL timing_stop('inferences')

@@ -8,18 +8,19 @@ import os
 def ocean_info():
     # ocean namelist
     nemo_nml = eophis.FortranNamelist(os.path.join(os.getcwd(),'namelist_cfg'))
+    step = nemo_nml.get('rn_Dt')
 
     # coupling config
     tunnel_config = list()
     tunnel_config.append( { 'label' : 'TO_NEMO_FIELDS', \
-                            'grids' : { 'eORCA025' : (62,199,0,0) }, \
-                            'exchs' : [ {'freq' : 2700, 'grd' : 'eORCA025', 'lvl' : 1, 'in' : ['sst','sss'], 'out' : ['rho']} ] }
+                            'grids' : { 'DINO_Grid' : (62,199,0,0) }, \
+                            'exchs' : [ {'freq' : step, 'grd' : 'DINO_Grid', 'lvl' : 1, 'in' : ['u','v'], 'out' : ['u_f','v_f']} ] }
                         )
                         
     # static coupling (manual send/receive)
     tunnel_config.append( { 'label' : 'TO_NEMO_METRICS', \
-                            'grids' : { 'eORCA025' : (62,199,0,0) }, \
-                            'exchs' : [ {'freq' : Freqs.STATIC, 'grd' : 'eORCA025', 'lvl' : 1, 'in' : ['mask_u','mask_v'], 'out' : []} ] }
+                            'grids' : { 'DINO_Grid' : (62,199,0,0) }, \
+                            'exchs' : [ {'freq' : Freqs.STATIC, 'grd' : 'DINO_Grid', 'lvl' : 1, 'in' : ['mask_u','mask_v'], 'out' : []} ] }
                         )
                         
     return tunnel_config, nemo_nml
@@ -60,8 +61,7 @@ def production():
 
     #  Models
     # ++++++++
-    #from models import Std_Stanley, GTF_LinReg_Stanley, GTF_FCNN_Stanley, GTF_CNN_Stanley
-    from models import Std_Stanley
+    from models import momentum_cnn
 
     # get masks
     mask_u = nemo_metrics.receive('mask_u')
@@ -72,9 +72,7 @@ def production():
     @eophis.all_in_all_out(earth_system=nemo, step=step, niter=niter)
     def loop_core(**inputs):
         outputs = {}
-        
-        outputs['rho'] = Std_Stanley( T=inputs['sst'], S=inputs['sss'], mask_u=mask_u, mask_v=mask_v )
-        
+        outputs['u_f'], outputs['v_f'] = momentum_cnn( u=inputs['u'], v=inputs['v'], mask_u=mask_u, mask_v=mask_v )
         return outputs
 
     #  Run

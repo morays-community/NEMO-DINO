@@ -22,12 +22,12 @@ MODULE inffld
    !!----------------------------------------------------------------------
    !!                    2D Inference Module fields
    !!----------------------------------------------------------------------
-   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:)  :: tmp_inf_2D    !: dummy field to store 2D inferences
+   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:)  :: ext_uf, ext_vf !: Outsourced subgrid momentum forcing fields 
 
    !!----------------------------------------------------------------------
    !!                    3D Inference Module fields
    !!----------------------------------------------------------------------
-   REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:)  :: tmp_inf_3D  !: dummy field to store 3D inferences
+   !REAL(wp), PUBLIC, ALLOCATABLE, SAVE, DIMENSION(:,:,:)  :: tmp_inf_3D  !: dummy field to store 3D inferences
 
 CONTAINS
 
@@ -39,7 +39,7 @@ CONTAINS
       !!---------------------------------------------------------------------
       ierr = 0
       !
-      ALLOCATE( tmp_inf_2D(jpi,jpj) , tmp_inf_3D(jpi,jpj,jpk)  , STAT=ierr )
+      ALLOCATE( ext_uf(jpi,jpj) , ext_vf(jpi,jpj)  , STAT=ierr )
       inffld_alloc = ierr
       !
    END FUNCTION
@@ -53,7 +53,7 @@ CONTAINS
       !!---------------------------------------------------------------------
       ierr = 0
       !
-      DEALLOCATE( tmp_inf_2D , tmp_inf_3D  , STAT=ierr )
+      DEALLOCATE( ext_uf , ext_vf  , STAT=ierr )
       inffld_dealloc = ierr
       !
    END FUNCTION
