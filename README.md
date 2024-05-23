@@ -30,5 +30,5 @@
 
 - No Post-Process libraries
 
-- Plotting : Python script in `POSTPROCESS`, with `plots.yml`
+- Plotting : Python script `plots_res.py` in `POSTPROCESS`
 
