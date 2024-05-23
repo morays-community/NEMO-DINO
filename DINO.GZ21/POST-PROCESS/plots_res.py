@@ -4,10 +4,6 @@ import numpy as np
 import xarray as xr
 import cmocean
 
-import cartopy.crs as ccrs
-import cartopy.feature as cfeature
-import cartopy.util as cutil
-
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import matplotlib.colors as colors
@@ -19,10 +15,9 @@ def make_plot(data,lon,lat,infos,output):
     data = tfs(data)
     # figure
     plt.figure(figsize=(12, 8))
-    ax = plt.axes(projection=ccrs.EqualEarth())
-    ax.add_feature(cfeature.LAND, zorder=100, edgecolor='k')
+    ax = plt.axes()
     # color map
-    pcm = ax.pcolormesh(lon, lat, data, cmap=cmap, norm=norm, transform=ccrs.PlateCarree())
+    pcm = ax.pcolormesh(lon, lat, data, cmap=cmap, norm=norm)
     cbar = plt.colorbar(pcm, ax=ax, orientation='vertical', pad=0.05, shrink=0.5)
     plt.title(title)
     # write fig
@@ -51,9 +46,9 @@ def main(filepath, var_name, infos):
 if __name__=="__main__":
 
     # uf
-    infos = [ 'uf (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-10, vmax=10), lambda x: x ]
-    main( filepath='NEVERWORLD_gridUsurf.nc' , var_name='ext_uf' , infos=infos)
+    infos = [ 'uf (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-1, vmax=1), lambda x: x ]
+    main( filepath='NEVERWORLD_gridUsurf.nc' , var_name='soext_uf' , infos=infos )
 
     # vf
-    infos = [ 'vf (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-10, vmax=10), lambda x: x ]
-    main( filepath='NEVERWORLD_gridVsurf.nc' , var_name='ext_vf' )
+    infos = [ 'vf (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-1, vmax=1), lambda x: x ]
+    main( filepath='NEVERWORLD_gridVsurf.nc' , var_name='soext_vf' , infos=infos )

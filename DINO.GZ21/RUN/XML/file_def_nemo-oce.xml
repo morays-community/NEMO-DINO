@@ -11,14 +11,14 @@
 
       <file_group id="1d" output_freq="1d"  output_level="10" enabled=".TRUE." >  <!-- 1d files -->  
       
-	<file id="file01" name_suffix="_gridUsurf" description="ocean U grid variables" >
-          <field field_ref="ssu" />
-          <field field_ref="ext_uf" />
+	<file id="file01" name_suffix="_gridUsurf" description="ocean U gridsurf variables" >
+          <field field_ref="ssu"    name="sozocrtx" />
+	  <field field_ref="ext_uf" name="soext_uf" />
         </file>
 
-        <file id="file02" name_suffix="_gridVsurf" description="ocean V grid variables" >
-          <field field_ref="ssv"  />
-          <field field_ref="ext_vf" />>
+        <file id="file02" name_suffix="_gridVsurf" description="ocean V gridsurf variables" >
+          <field field_ref="ssv"    name="somecrty" />
+          <field field_ref="ext_vf" name="soext_vf" />>
   	</file>
 
       </file_group>
