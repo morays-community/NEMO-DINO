@@ -8,7 +8,7 @@ import os
 def ocean_info():
     # ocean namelist
     nemo_nml = eophis.FortranNamelist(os.path.join(os.getcwd(),'namelist_cfg'))
-    step = nemo_nml.get('rn_Dt')
+    step, = nemo_nml.get('rn_Dt')
 
     # coupling config
     tunnel_config = list()
@@ -61,7 +61,7 @@ def production():
 
     #  Models
     # ++++++++
-    from models import momentum_cnn
+    from ml_models import momentum_cnn
 
     # get masks
     mask_u = nemo_metrics.receive('mask_u')
