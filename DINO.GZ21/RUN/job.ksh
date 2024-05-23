@@ -5,15 +5,11 @@
 #SBATCH --job-name=DINO.GZ21
 #SBATCH --output=DINO.GZ21.out
 #SBATCH --error=DINO.GZ21.err
-#SBATCH --nodes=9
-# standard output # error output
-#SBATCH --exclusive
-#SBATCH --ntasks=73 # Number of MPI tasks -- 72 NEMO + 1 Python
+#SBATCH --ntasks=2
 #SBATCH --hint=nomultithread # One MPI process per physical core (no hyperthreading)
 #SBATCH --time=00:30:00
 #SBATCH --account=cli@cpu
 #SBATCH --qos=qos_cpu-dev # Queue test
-# echo des commandes lancées
 
 # Load Environnment
 source ~/.bash_profile
@@ -55,4 +51,4 @@ else
 fi
 
 # run coupled NEMO-Python
-mpirun  -np 32 ./nemo : -np 1 python3 ./main.py --exec prod
+mpirun  -np 1 ./nemo : -np 1 python3 ./main.py --exec prod
