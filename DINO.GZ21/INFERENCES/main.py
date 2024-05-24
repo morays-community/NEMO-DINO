@@ -8,19 +8,19 @@ import os
 def ocean_info():
     # ocean namelist
     nemo_nml = eophis.FortranNamelist(os.path.join(os.getcwd(),'namelist_cfg'))
-    step, = nemo_nml.get('rn_Dt')
+    step,nlvl = nemo_nml.get('rn_Dt','nn_lvl')
 
     # coupling config
     tunnel_config = list()
     tunnel_config.append( { 'label' : 'TO_NEMO_FIELDS', \
                             'grids' : { 'DINO_Grid' : (62,199,0,0) }, \
-                            'exchs' : [ {'freq' : step, 'grd' : 'DINO_Grid', 'lvl' : 1, 'in' : ['u','v'], 'out' : ['u_f','v_f']} ] }
+                            'exchs' : [ {'freq' : step, 'grd' : 'DINO_Grid', 'lvl' : nlvl, 'in' : ['u','v'], 'out' : ['u_f','v_f']} ] }
                         )
                         
     # static coupling (manual send/receive)
     tunnel_config.append( { 'label' : 'TO_NEMO_METRICS', \
                             'grids' : { 'DINO_Grid' : (62,199,0,0) }, \
-                            'exchs' : [ {'freq' : Freqs.STATIC, 'grd' : 'DINO_Grid', 'lvl' : 1, 'in' : ['mask_u','mask_v'], 'out' : []} ] }
+                            'exchs' : [ {'freq' : Freqs.STATIC, 'grd' : 'DINO_Grid', 'lvl' : nlvl, 'in' : ['mask_u','mask_v'], 'out' : []} ] }
                         )
                         
     return tunnel_config, nemo_nml

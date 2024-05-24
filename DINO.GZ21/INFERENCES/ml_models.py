@@ -35,26 +35,29 @@ def momentum_cnn(u, v, mask_u, mask_v):
         return None
     else:
         fake_weight = 0.0001
-        u, v = u[:,:,0], v[:,:,0]
-        u, v = torch.tensor(u.astype(np.float32)), torch.tensor(v.astype(np.float32))
-        inputs = torch.stack([u, v])[None]
-        net = FullyCNN(2, 4, padding='same').eval()
-        transformation = transforms.SoftPlusTransform()
-        transformation.indices = [2, 3] # What to put here ? 
-        net.final_transformation = transformation
-        r = net(inputs)
-        Su_mu, Sv_mu, Su_std, Sv_std = r[0, 0], r[0, 1], r[0, 2], r[0, 3]
-        u_c = fake_weight * ( u + Su_mu + Su_std*torch.randn_like(Su_std) ).numpy()
-        v_c = fake_weight * ( v + Sv_mu + Su_std*torch.randn_like(Sv_std) ).numpy()
-        return u_c[:,:,np.newaxis]*mask_u , v_c[:,:,np.newaxis]*mask_v
+        for z in range(u.shape[2]):
+            u_slice, v_slice = u[:,:,z], v[:,:,z]
+            u_slice, v_slice = torch.tensor(u_slice.astype(np.float32)), torch.tensor(v_slice.astype(np.float32))
+            inputs = torch.stack([u_slice, v_slice])[None]
+            net = FullyCNN(2, 4, padding='same').eval()
+            transformation = transforms.SoftPlusTransform()
+            transformation.indices = [2, 3] # What to put here ? 
+            net.final_transformation = transformation
+            r = net(inputs)
+            Su_mu, Sv_mu, Su_std, Sv_std = r[0, 0], r[0, 1], r[0, 2], r[0, 3]
+            u_c = fake_weight * ( u_slice + Su_mu + Su_std*torch.randn_like(Su_std) ).numpy()
+            v_c = fake_weight * ( v_slice + Sv_mu + Su_std*torch.randn_like(Sv_std) ).numpy()
+            u[:,:,z] = u_c
+            v[:,:,z] = v_c
+        return u*mask_u , v*mask_v
     
 
 
 if __name__ == '__main__' : 
-    u = np.random.rand(120, 100, 1).astype('float32')
-    v = np.random.rand(120, 100, 1).astype('float32')
-    mask_u = np.ones((120, 100, 1)).astype('float32')
-    mask_v = np.ones((120, 100, 1)).astype('float32')
+    u = np.random.rand(120, 100, 3).astype('float32')
+    v = np.random.rand(120, 100, 3).astype('float32')
+    mask_u = np.ones((120, 100, 3)).astype('float32')
+    mask_v = np.ones((120, 100, 3)).astype('float32')
     n_u, n_v = momentum_cnn(u, v, mask_u, mask_v)
     print(f'Returned n_u : {n_u.shape} n_v : {n_v.shape}')
     print(f'Test successful')

@@ -54,7 +54,8 @@ MODULE infmod
    !   CHARACTER(len = 32) ::         ! 
    !END TYPE FLD_INF
    !
-   LOGICAL , PUBLIC ::   ln_inf    !: activate module for inference models
+   LOGICAL , PUBLIC ::   ln_inf        !: activate module for inference models
+   INTEGER , PUBLIC ::   nn_lvl        !: number of grid level on which apply the inference model
    
    !!-------------------------------------------------------------------------
 
@@ -108,7 +109,7 @@ CONTAINS
       !
       INTEGER ::   ios   ! Local Integer
       !!
-      NAMELIST/naminf/  ln_inf
+      NAMELIST/naminf/  ln_inf, nn_lvl
       !!----------------------------------------------------------------------
       !
       ! ================================ !
@@ -130,8 +131,7 @@ CONTAINS
       IF ( lwp .AND. ln_inf ) THEN
          WRITE(numout,*)'   Namelist naminf'
          WRITE(numout,*)'      Module used       ln_inf        = ', ln_inf
-         WRITE(numout,*)'      Models available:'
-         WRITE(numout,*)'         Stanley et al. (2020)        = ', 'T by default for now'
+         WRITE(numout,*)'      Model applied on nn_lvl grid level,   nn_lvl     = ', nn_lvl
       ENDIF
       !
       IF( ln_inf .AND. .NOT. lk_oasis )   CALL ctl_stop( 'inferences_init : External inferences coupled via OASIS, but key_oasis3 disabled' )
@@ -143,10 +143,10 @@ CONTAINS
       !
       ! default definitions of ssnd snd srcv
       srcv(ntypinf,:)%laction = .FALSE.  ;  srcv(ntypinf,:)%clgrid = 'T'  ;  srcv(ntypinf,:)%nsgn = 1.
-      srcv(ntypinf,:)%nct = 1  ;  srcv(ntypinf,:)%nlvl = 1
+      srcv(ntypinf,:)%nct = 1  ;  srcv(ntypinf,:)%nlvl = nn_lvl
       !
       ssnd(ntypinf,:)%laction = .FALSE.  ;  ssnd(ntypinf,:)%clgrid = 'T'  ;  ssnd(ntypinf,:)%nsgn = 1.
-      ssnd(ntypinf,:)%nct = 1  ;  ssnd(ntypinf,:)%nlvl = 1
+      ssnd(ntypinf,:)%nct = 1  ;  ssnd(ntypinf,:)%nlvl = nn_lvl
       
       IF( ln_inf ) THEN
       
@@ -209,7 +209,7 @@ CONTAINS
       !!----------------------------------------------------------------------
       INTEGER, INTENT(in)                                 ::  kt             ! ocean time step
       INTEGER, INTENT(in)                                 ::  Kbb, Kmm, Krhs ! ocean time level indices
-      REAL(wp), DIMENSION(jpi,jpj,jpk,jpt), INTENT(inout) ::  puu, pvv
+      REAL(wp), DIMENSION(jpi,jpj,jpk,jpt), INTENT(inout) ::  puu, pvv       ! ocean horizontal velocities
       !
       INTEGER :: isec, info, jn                       ! local integer
       REAL(wp), DIMENSION(jpi,jpj,jpk)   ::  zdata    ! sending buffer
@@ -268,16 +268,16 @@ CONTAINS
       !
       ! Subgrid forcing fields
       IF( srcv(ntypinf,jpr_uf)%laction .AND. srcv(ntypinf,jpr_vf)%laction ) THEN
-         ext_uf(:,:) = infrcv(jpr_uf)%z3(:,:,1)
-         ext_vf(:,:) = infrcv(jpr_vf)%z3(:,:,1)
+         ext_uf(:,:,1:srcv(ntypinf,jpr_uf)%nlvl) = infrcv(jpr_uf)%z3(:,:,1:srcv(ntypinf,jpr_uf)%nlvl)
+         ext_vf(:,:,1:srcv(ntypinf,jpr_vf)%nlvl) = infrcv(jpr_vf)%z3(:,:,1:srcv(ntypinf,jpr_vf)%nlvl)
 
-         ! Output tendencies 
-         CALL iom_put( 'ext_uf', ext_uf )
-         CALL iom_put( 'ext_vf', ext_vf )
+         ! Output surface tendencies 
+         CALL iom_put( 'ext_uf', ext_uf(:,:,1) )
+         CALL iom_put( 'ext_vf', ext_vf(:,:,1) )
 
          ! Apply forcing fields to RHS
-         puu(:,:,1,Krhs) = puu(:,:,1,Krhs) + ext_uf(:,:)
-         pvv(:,:,1,Krhs) = pvv(:,:,1,Krhs) + ext_vf(:,:)
+         puu(:,:,1:srcv(ntypinf,jpr_uf)%nlvl,Krhs) = puu(:,:,1:srcv(ntypinf,jpr_uf)%nlvl,Krhs) + ext_uf(:,:,1:srcv(ntypinf,jpr_uf)%nlvl)
+         pvv(:,:,1:srcv(ntypinf,jpr_vf)%nlvl,Krhs) = pvv(:,:,1:srcv(ntypinf,jpr_vf)%nlvl,Krhs) + ext_vf(:,:,1:srcv(ntypinf,jpr_vf)%nlvl)
       ENDIF
       !
       IF( ln_timing )   CALL timing_stop('inferences')

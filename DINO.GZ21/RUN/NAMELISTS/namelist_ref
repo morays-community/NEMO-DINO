@@ -1581,4 +1581,5 @@
 &naminf        ! Inferences models                      (default: OFF)
 !-----------------------------------------------------------------------
    ln_inf  = .false.       ! activate module for inference models
+   nn_lvl = 1             ! number of grid level on which apply the inference model, (default=jpk)
 /
