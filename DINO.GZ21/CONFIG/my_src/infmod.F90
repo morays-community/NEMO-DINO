@@ -198,7 +198,7 @@ CONTAINS
    END SUBROUTINE inferences_init
 
 
-   SUBROUTINE inferences( kt, Kbb, Kmm, Kaa )
+   SUBROUTINE inferences( kt, Kbb, Kmm, puu, pvv, Krhs )
       !!----------------------------------------------------------------------
       !!             ***  ROUTINE inferences  ***
       !!
@@ -207,8 +207,9 @@ CONTAINS
       !! ** Method  :   *  
       !!                * 
       !!----------------------------------------------------------------------
-      INTEGER, INTENT(in) ::   kt            ! ocean time step
-      INTEGER, INTENT(in) ::   Kbb, Kmm, Kaa ! ocean time level indices
+      INTEGER, INTENT(in)                                 ::  kt             ! ocean time step
+      INTEGER, INTENT(in)                                 ::  Kbb, Kmm, Krhs ! ocean time level indices
+      REAL(wp), DIMENSION(jpi,jpj,jpk,jpt), INTENT(inout) ::  puu, pvv
       !
       INTEGER :: isec, info, jn                       ! local integer
       REAL(wp), DIMENSION(jpi,jpj,jpk)   ::  zdata    ! sending buffer
@@ -223,12 +224,12 @@ CONTAINS
       !
       ! Sea Surface U velocity
       IF( ssnd(ntypinf,jps_ssu)%laction ) THEN
-         infsnd(jps_ssu)%z3(:,:,1:ssnd(ntypinf,jps_ssu)%nlvl) = uu(:,:,1:ssnd(ntypinf,jps_ssu)%nlvl,Kmm)
+         infsnd(jps_ssu)%z3(:,:,1:ssnd(ntypinf,jps_ssu)%nlvl) = puu(:,:,1:ssnd(ntypinf,jps_ssu)%nlvl,Kbb)
       ENDIF  
       !
       ! Sea Surface V velocity
       IF( ssnd(ntypinf,jps_ssv)%laction ) THEN
-         infsnd(jps_ssv)%z3(:,:,1:ssnd(ntypinf,jps_ssv)%nlvl) = vv(:,:,1:ssnd(ntypinf,jps_ssv)%nlvl,Kmm) 
+         infsnd(jps_ssv)%z3(:,:,1:ssnd(ntypinf,jps_ssv)%nlvl) = pvv(:,:,1:ssnd(ntypinf,jps_ssv)%nlvl,Kbb) 
       ENDIF
       !
       ! u-grid surface mask
@@ -270,9 +271,13 @@ CONTAINS
          ext_uf(:,:) = infrcv(jpr_uf)%z3(:,:,1)
          ext_vf(:,:) = infrcv(jpr_vf)%z3(:,:,1)
 
-         ! Write in output file 
+         ! Output tendencies 
          CALL iom_put( 'ext_uf', ext_uf )
          CALL iom_put( 'ext_vf', ext_vf )
+
+         ! Apply forcing fields to RHS
+         puu(:,:,1,Krhs) = puu(:,:,1,Krhs) + ext_uf(:,:)
+         pvv(:,:,1,Krhs) = pvv(:,:,1,Krhs) + ext_vf(:,:)
       ENDIF
       !
       IF( ln_timing )   CALL timing_stop('inferences')

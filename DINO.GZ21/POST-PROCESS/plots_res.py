@@ -38,17 +38,25 @@ def main(filepath, var_name, infos):
     var_val = getattr(ds,var_name).values[-1]
 
     # plot
-    plotpath = 'NEVERWORLD_' + var_name + '.png'
+    plotpath = 'NEVERWORLD.GZ21_' + var_name + '.png'
     make_plot(var_val,lon,lat,infos,plotpath)
 
 
 
 if __name__=="__main__":
 
+    # usurf
+    infos = [ 'u (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-3.0, vmax=3.0), lambda x: x ]
+    main( filepath='NEVERWORLD_gridUsurf.nc' , var_name='sozocrtx' , infos=infos )
+
+    # vsurf
+    infos = [ 'v (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-3.0, vmax=3.0), lambda x: x ]
+    main( filepath='NEVERWORLD_gridVsurf.nc' , var_name='somecrty' , infos=infos )
+
     # uf
-    infos = [ 'uf (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-1, vmax=1), lambda x: x ]
+    infos = [ 'uf (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.001, vmax=0.001), lambda x: x ]
     main( filepath='NEVERWORLD_gridUsurf.nc' , var_name='soext_uf' , infos=infos )
 
     # vf
-    infos = [ 'vf (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-1, vmax=1), lambda x: x ]
+    infos = [ 'vf (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.001, vmax=0.001), lambda x: x ]
     main( filepath='NEVERWORLD_gridVsurf.nc' , var_name='soext_vf' , infos=infos )

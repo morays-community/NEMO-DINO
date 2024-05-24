@@ -166,11 +166,6 @@ CONTAINS
                          CALL sbc     ( kstp, Nbb, Nnn )              ! Sea Boundary Condition (including sea-ice)
 
       !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-      ! Update data from external Inferences
-      !<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                         CALL inferences ( kstp, Nbb, Nnn, Naa )      ! External inferences models 
-
-      !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
       ! Update stochastic parameters and random T/S fluctuations
       !>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
       IF( ln_sto_eos )   CALL sto_par( kstp )                         ! Stochastic parameters
@@ -266,6 +261,7 @@ CONTAINS
                             CALL dyn_adv( kstp, Nbb, Nnn      , uu, vv, Nrhs )  ! advection (VF or FF)	==> RHS
                             CALL dyn_vor( kstp,      Nnn      , uu, vv, Nrhs )  ! vorticity           	==> RHS
                             CALL dyn_ldf( kstp, Nbb, Nnn      , uu, vv, Nrhs )  ! lateral mixing
+                            CALL inferences ( kstp,  Nbb, Nnn , uu, vv, Nrhs )  ! External inferences models 
          IF( ln_zdfosm  )   CALL dyn_osm( kstp,      Nnn      , uu, vv, Nrhs )  ! OSMOSIS non-local velocity fluxes ==> RHS
                             CALL dyn_hpg( kstp,      Nnn      , uu, vv, Nrhs )  ! horizontal gradient of Hydrostatic pressure
       END DO
