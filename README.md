@@ -1,4 +1,4 @@
-# Generic Experiment Name
+# DINO
 
 ## Context and Motivation
 
