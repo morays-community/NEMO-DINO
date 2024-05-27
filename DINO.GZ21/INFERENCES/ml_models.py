@@ -52,7 +52,7 @@ def momentum_cnn(u, v, mask_u, mask_v):
         return u*mask_u , v*mask_v
     
 @torch.no_grad()
-def model_loading(weights_path='weights/gz21-ocean-momentum/low-resolution/files/', device='cpu') : 
+def model_loading(weights_path='weights/gz21_huggingface/low-resolution/files/', device='cpu') : 
     net = FullyCNN(padding='same')
     model_weights = torch.load(weights_path +'trained_model.pth', map_location=device)
     #net.final_transformation = pickle.load(open(weights_path+'transformation', 'rb')) 
