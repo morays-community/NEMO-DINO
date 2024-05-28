@@ -3,7 +3,6 @@ import sys
 import torch
 import pickle
 import sys
-sys.path.append('gz21_ocean_momentum/src/')
 
 from gz21_ocean_momentum.models.models1 import FullyCNN
 import gz21_ocean_momentum.models.transforms as transforms
@@ -37,24 +36,27 @@ def momentum_cnn(u, v, mask_u, mask_v):
     if Is_None([u, v]):
         return None
     else:
-        fake_weight = 0.0001
+        alpha = 0.0000001
         for z in range(u.shape[2]):
-            u_slice, v_slice = u[:,:,z], v[:,:,z]
+            normu, normv = np.std(u[:,:,z]), np.std(v[:,:,z])
+            normu = 1.0 if normu == 0.0 else normu
+            normv = 1.0 if normv == 0.0 else normv
+            u_slice, v_slice = u[:,:,z] / normu, v[:,:,z] / normv
             u_slice, v_slice = torch.tensor(u_slice.astype(np.float32)), torch.tensor(v_slice.astype(np.float32))
             inputs = torch.stack([u_slice, v_slice])[None]
             net = model_loading()
             r = net(inputs) # u, v -> s_x, s_y, std_x, std_y
             Su_mu, Sv_mu, Su_std, Sv_std = r[0, 0], r[0, 1], r[0, 2], r[0, 3]
-            u_c = fake_weight * ( u_slice + Su_mu + Su_std*torch.randn_like(Su_std) ).numpy()
-            v_c = fake_weight * ( v_slice + Sv_mu + Su_std*torch.randn_like(Sv_std) ).numpy()
-            u[:,:,z] = u_c
-            v[:,:,z] = v_c
+            u_c = ( Su_mu + Su_std*torch.randn_like(Su_std) ).numpy()
+            v_c = ( Sv_mu + Su_std*torch.randn_like(Sv_std) ).numpy()
+            u[:,:,z] = u_c * alpha
+            v[:,:,z] = v_c * alpha
         return u*mask_u , v*mask_v
     
 @torch.no_grad()
 def model_loading(weights_path='weights/gz21_huggingface/low-resolution/files/', device='cpu') : 
     net = FullyCNN(padding='same')
-    model_weights = torch.load(weights_path +'trained_model.pth', map_location=device)
+    model_weights = torch.load('trained_model.pth', map_location=device)
     #net.final_transformation = pickle.load(open(weights_path+'transformation', 'rb')) 
     transformation = transforms.SoftPlusTransform()
     transformation.indices = [2, 3] # Careful if model change
@@ -69,5 +71,6 @@ if __name__ == '__main__' :
     mask_u = np.ones((120, 100, 3)).astype('float32')
     mask_v = np.ones((120, 100, 3)).astype('float32')
     n_u, n_v = momentum_cnn(u, v, mask_u, mask_v)
+    print(f'fin: {n_u[0,0]}')
     print(f'Returned n_u : {n_u.shape} n_v : {n_v.shape}')
     print(f'Test successful')

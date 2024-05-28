@@ -46,17 +46,17 @@ def main(filepath, var_name, infos):
 if __name__=="__main__":
 
     # usurf
-    infos = [ 'u (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-3.0, vmax=3.0), lambda x: x ]
+    infos = [ 'u (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.10, vmax=0.10), lambda x: x ]
     main( filepath='NEVERWORLD_gridUsurf.nc' , var_name='sozocrtx' , infos=infos )
 
     # vsurf
-    infos = [ 'v (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-3.0, vmax=3.0), lambda x: x ]
+    infos = [ 'v (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.10, vmax=0.10), lambda x: x ]
     main( filepath='NEVERWORLD_gridVsurf.nc' , var_name='somecrty' , infos=infos )
 
     # uf
-    infos = [ 'uf (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.001, vmax=0.001), lambda x: x ]
+    infos = [ 'uf (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.000001, vmax=0.000001), lambda x: x ]
     main( filepath='NEVERWORLD_gridUsurf.nc' , var_name='soext_uf' , infos=infos )
 
     # vf
-    infos = [ 'vf (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.001, vmax=0.001), lambda x: x ]
+    infos = [ 'vf (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.000001, vmax=0.000001), lambda x: x ]
     main( filepath='NEVERWORLD_gridVsurf.nc' , var_name='soext_vf' , infos=infos )
