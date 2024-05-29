@@ -71,6 +71,5 @@ if __name__ == '__main__' :
     mask_u = np.ones((120, 100, 3)).astype('float32')
     mask_v = np.ones((120, 100, 3)).astype('float32')
     n_u, n_v = momentum_cnn(u, v, mask_u, mask_v)
-    print(f'fin: {n_u[0,0]}')
     print(f'Returned n_u : {n_u.shape} n_v : {n_v.shape}')
     print(f'Test successful')
