@@ -32,7 +32,7 @@ def Is_None(*inputs):
 # ------------------------------
 @torch.no_grad()
 def momentum_cnn(u, v, mask_u, mask_v):
-    """ Take as input u and v fields and return corrected fields using GZ (2021)  """
+    """ Take as input u and v fields and return subgrid forcing fields using GZ (2021)  """
     if Is_None([u, v]):
         return None
     else:
@@ -47,10 +47,10 @@ def momentum_cnn(u, v, mask_u, mask_v):
             net = model_loading()
             r = net(inputs) # u, v -> s_x, s_y, std_x, std_y
             Su_mu, Sv_mu, Su_std, Sv_std = r[0, 0], r[0, 1], r[0, 2], r[0, 3]
-            u_c = ( Su_mu + Su_std*torch.randn_like(Su_std) ).numpy()
-            v_c = ( Sv_mu + Su_std*torch.randn_like(Sv_std) ).numpy()
-            u[:,:,z] = u_c * alpha
-            v[:,:,z] = v_c * alpha
+            fu = ( Su_mu + Su_std*torch.randn_like(Su_std) ).numpy()
+            fv = ( Sv_mu + Su_std*torch.randn_like(Sv_std) ).numpy()
+            u[:,:,z] = fu * alpha
+            v[:,:,z] = fv * alpha
         return u*mask_u , v*mask_v
     
 @torch.no_grad()
