@@ -7,7 +7,7 @@
 #SBATCH --error=DINO.GZ21.err
 #SBATCH --ntasks=2
 #SBATCH --hint=nomultithread # One MPI process per physical core (no hyperthreading)
-#SBATCH --time=00:30:00
+#SBATCH --time=11:30:00
 #SBATCH --account=cli@cpu
 #SBATCH --qos=qos_cpu-dev # Queue test
 
