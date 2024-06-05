@@ -10,6 +10,8 @@ import gz21_ocean_momentum.models.transforms as transforms
 import gz21_ocean_momentum.train.losses as loss_funcs
 
 
+
+
 # ============================= #
 # -- User Defined Parameters --
 # ============================= #
@@ -31,6 +33,9 @@ def Is_None(*inputs):
 
 #       Main Model Routines
 # ------------------------------
+# Loading the model once for all
+net = model_loading()
+
 @torch.no_grad()
 def momentum_cnn(u, v, mask_u, mask_v):
     """ Take as input u and v fields and return subgrid forcing fields using GZ (2021)  """
@@ -45,7 +50,6 @@ def momentum_cnn(u, v, mask_u, mask_v):
             u_slice, v_slice = u[:,:,z] / normu, v[:,:,z] / normv
             u_slice, v_slice = torch.tensor(u_slice.astype(np.float32)), torch.tensor(v_slice.astype(np.float32))
             inputs = torch.stack([u_slice, v_slice])[None]
-            net = model_loading()
             r = net(inputs) # u, v -> s_x, s_y, std_x, std_y
             Su_mu, Sv_mu, Su_std, Sv_std = r[0, 0], r[0, 1], r[0, 2], r[0, 3]
             fu = ( Su_mu + Su_std*torch.randn_like(Su_std) ).numpy()
