@@ -10,12 +10,15 @@ import gz21_ocean_momentum.models.transforms as transforms
 import gz21_ocean_momentum.train.losses as loss_funcs
 
 
+#       Utils 
+# -----------------
+def Is_None(*inputs):
+    """ Test presence of at least one None in inputs """
+    return any(item is None for item in inputs)
 
 
-# ============================= #
-# -- User Defined Parameters --
-# ============================= #
-
+#       Main Model Routines
+# ------------------------------
 # use GPUs if available
 if torch.cuda.is_available():
     print("CUDA Available")
@@ -24,25 +27,34 @@ else:
     print('CUDA Not Available')
     device = torch.device('cpu')
 
-
-#       Utils 
-# -----------------
-def Is_None(*inputs):
-    """ Test presence of at least one None in inputs """
-    return any(item is None for item in inputs)
-
-#       Main Model Routines
-# ------------------------------
 # Loading the model once for all
+@torch.no_grad()
+def model_loading(weights_path='weights/gz21_huggingface/low-resolution/files/', device='cpu') :
+    net = FullyCNN(padding='same')
+    # in-repo test or in local deployed config dir
+    try:
+        model_weights = torch.load('trained_model.pth', map_location=device)
+    except:
+        model_weights = torch.load(weights_path + 'trained_model.pth', map_location=device)
+    #net.final_transformation = pickle.load(open(weights_path+'transformation', 'rb'))
+    transformation = transforms.SoftPlusTransform()
+    transformation.indices = [2, 3] # Careful if model change
+    net.final_transformation = transformation
+    net.load_state_dict(model_weights)
+    net.eval()
+    return net
+
 net = model_loading()
 
+# prediction routine
 @torch.no_grad()
 def momentum_cnn(u, v, mask_u, mask_v):
     """ Take as input u and v fields and return subgrid forcing fields using GZ (2021)  """
     if Is_None([u, v]):
         return None
     else:
-        alpha = 0.0000001
+        global net
+        alpha = 0.000005
         for z in range(u.shape[2]):
             normu, normv = np.std(u[:,:,z]), np.std(v[:,:,z])
             normu = 1.0 if normu == 0.0 else normu
@@ -57,18 +69,6 @@ def momentum_cnn(u, v, mask_u, mask_v):
             u[:,:,z] = fu * alpha
             v[:,:,z] = fv * alpha
         return u*mask_u , v*mask_v
-    
-@torch.no_grad()
-def model_loading(weights_path='weights/gz21_huggingface/low-resolution/files/', device='cpu') : 
-    net = FullyCNN(padding='same')
-    model_weights = torch.load(weights_path +'trained_model.pth', map_location=device)
-    #net.final_transformation = pickle.load(open(weights_path+'transformation', 'rb')) 
-    transformation = transforms.SoftPlusTransform()
-    transformation.indices = [2, 3] # Careful if model change
-    net.final_transformation = transformation
-    net.load_state_dict(model_weights)
-    net.eval() 
-    return net 
 
 if __name__ == '__main__' : 
     u = np.random.rand(120, 100, 3).astype('float32')
