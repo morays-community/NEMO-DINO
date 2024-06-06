@@ -60,15 +60,15 @@ if __name__=="__main__":
     # snapshots
     # ---------
     # kinetic energy
-    infos = [ 'KE (cm2/s2)' , cmocean.cm.amp , colors.LogNorm(vmin=1.0e-3, vmax=1.0e5), lambda x: x*1000 ]
+    infos = [ 'KE (m2/s2)' , cmocean.cm.haline , colors.Normalize(vmin=0.0, vmax=0.03), lambda x: x ]
     main( filepath='NEVERWORLD.1d_gridTsurf.nc' , var_name='sKE' , infos=infos , freq='1d' )
 
     # usurf
-    infos = [ 'Sea Surface U (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.3, vmax=0.3), lambda x: x ]
+    infos = [ 'Sea Surface U (m/s)' , cmocean.cm.diff , colors.Normalize(vmin=-0.3, vmax=0.3), lambda x: x ]
     main( filepath='NEVERWORLD.1d_gridUsurf.nc' , var_name='sozocrtx' , infos=infos , freq='1d' )
 
     # vsurf
-    infos = [ 'Sea Surface V (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.3, vmax=0.3), lambda x: x ]
+    infos = [ 'Sea Surface V (m/s)' , cmocean.cm.diff , colors.Normalize(vmin=-0.3, vmax=0.3), lambda x: x ]
     main( filepath='NEVERWORLD.1d_gridVsurf.nc' , var_name='somecrty' , infos=infos , freq='1d' )
 
     # uf
@@ -81,15 +81,15 @@ if __name__=="__main__":
 
     # yearly mean
     # kinetic energy
-    infos = [ 'KE (cm2/s2)' , cmocean.cm.amp , colors.LogNorm(vmin=1.0e-3, vmax=1.0e5), lambda x: x*1000 ]
-    main( filepath='NEVERWORLD.1d_gridT.nc' , var_name='ke' , infos=infos , freq='1y' )
+    infos = [ 'KE (m2/s2)' , cmocean.cm.haline , colors.Normalize(vmin=0.0, vmax=0.05), lambda x: x ]
+    main( filepath='NEVERWORLD.1y_gridT.nc' , var_name='ke' , infos=infos , freq='1y' )
 
     # usurf
-    infos = [ 'Sea Surface U (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.3, vmax=0.3), lambda x: x ]
-    main( filepath='NEVERWORLD.1d_gridU.nc' , var_name='uoce' , infos=infos , freq='1y' )
+    infos = [ 'Sea Surface U (m/s)' , cmocean.cm.diff , colors.Normalize(vmin=-0.3, vmax=0.3), lambda x: x ]
+    main( filepath='NEVERWORLD.1y_gridU.nc' , var_name='uoce' , infos=infos , freq='1y' )
 
     # vsurf
-    infos = [ 'Sea Surface V (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.3, vmax=0.3), lambda x: x ]
+    infos = [ 'Sea Surface V (m/s)' , cmocean.cm.diff , colors.Normalize(vmin=-0.3, vmax=0.3), lambda x: x ]
     main( filepath='NEVERWORLD.1y_gridV.nc' , var_name='voce' , infos=infos , freq='1y' )
 
     # uf
