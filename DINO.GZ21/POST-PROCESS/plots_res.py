@@ -64,22 +64,6 @@ if __name__=="__main__":
     main( filepath='NEVERWORLD.1d_gridTsurf.nc' , var_name='sKE' , infos=infos , freq='1d' )
 
     # usurf
-<<<<<<< HEAD
-    infos = [ 'u (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.10, vmax=0.10), lambda x: x ]
-    main( filepath='NEVERWORLD_gridUsurf.nc' , var_name='sozocrtx' , infos=infos )
-
-    # vsurf
-    infos = [ 'v (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.10, vmax=0.10), lambda x: x ]
-    main( filepath='NEVERWORLD_gridVsurf.nc' , var_name='somecrty' , infos=infos )
-
-    # uf
-    infos = [ 'uf (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.000001, vmax=0.000001), lambda x: x ]
-    main( filepath='NEVERWORLD_gridUsurf.nc' , var_name='soext_uf' , infos=infos )
-
-    # vf
-    infos = [ 'vf (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.000001, vmax=0.000001), lambda x: x ]
-    main( filepath='NEVERWORLD_gridVsurf.nc' , var_name='soext_vf' , infos=infos )
-=======
     infos = [ 'Sea Surface U (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.3, vmax=0.3), lambda x: x ]
     main( filepath='NEVERWORLD.1d_gridUsurf.nc' , var_name='sozocrtx' , infos=infos , freq='1d' )
 
@@ -115,4 +99,3 @@ if __name__=="__main__":
     # vf
     infos = [ 'V-grid forcing (m/s2)' , cmocean.cm.balance , colors.Normalize(vmin=-0.00005, vmax=0.00005), lambda x: x ]
     main( filepath='NEVERWORLD.1y_gridV.nc' , var_name='ext_vf' , infos=infos , freq='1y' )
->>>>>>> 585af10252b9cd3e463344c4ae90f33796a1f114
