@@ -82,11 +82,11 @@ if __name__=="__main__":
     # yearly mean
     # kinetic energy
     infos = [ 'KE (cm2/s2)' , cmocean.cm.amp , colors.LogNorm(vmin=1.0e-3, vmax=1.0e5), lambda x: x*1000 ]
-    main( filepath='NEVERWORLD.1d_gridT.nc' , var_name='ke' , infos=infos , freq='1y' )
+    main( filepath='NEVERWORLD.1y_gridT.nc' , var_name='ke' , infos=infos , freq='1y' )
 
     # usurf
     infos = [ 'Sea Surface U (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.3, vmax=0.3), lambda x: x ]
-    main( filepath='NEVERWORLD.1d_gridU.nc' , var_name='uoce' , infos=infos , freq='1y' )
+    main( filepath='NEVERWORLD.1y_gridU.nc' , var_name='uoce' , infos=infos , freq='1y' )
 
     # vsurf
     infos = [ 'Sea Surface V (m/s)' , cmocean.cm.balance , colors.Normalize(vmin=-0.3, vmax=0.3), lambda x: x ]
