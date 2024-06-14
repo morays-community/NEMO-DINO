@@ -63,10 +63,10 @@ def momentum_cnn(u, v, mask_u, mask_v):
         return u*mask_u , v*mask_v
     
 @torch.no_grad()
-def model_loading(weights_path='weights/gz21_huggingface/low-resolution/files/', device='cpu') : 
+def model_loading(weights_path='weights/gz21_huggingface/low-resolution/files/trained_model.pth', device='cpu') : 
     net = FullyCNN(padding='same')
-    model_weights = torch.load(weights_path +'trained_model.pth', map_location=device)
-    #net.final_transformation = pickle.load(open(weights_path+'transformation', 'rb')) 
+    print(f'Loading model from {weights_path}')
+    model_weights = torch.load(weights_path, map_location=device)
     transformation = transforms.SoftPlusTransform()
     transformation.indices = [2, 3] # Careful if model change
     net.final_transformation = transformation
