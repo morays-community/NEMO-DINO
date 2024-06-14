@@ -1,3 +1,5 @@
+Weights taken from : https://huggingface.co/M2LInES/gz21-ocean-momentum
+
 # gz21-ocean-momentum pretrained models
 [gfdl-cm2.6-pangeo]: https://catalog.pangeo.io/browse/master/ocean/GFDL_CM2_6/
 [gz21-gh]: https://github.com/m2lines/gz21_ocean_momentum
