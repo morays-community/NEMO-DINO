@@ -2,7 +2,7 @@ import numpy as np
 import torch
 
 from model_gz21_eophis import FullyCNN
-import models.transforms as transforms
+import transforms as transforms
 
 
 #       Utils 
@@ -40,7 +40,7 @@ Sv_scale= 1e-7
 # ------------------------------
 
 @torch.no_grad()
-def model_loading(weights_path='weights/gz21_huggingface/low-resolution/files/trained_model.pth', device='cpu') : 
+def model_loading(weights_path='../weights/gz21_huggingface/low-resolution/files/trained_model.pth', device='cpu') : 
     net = FullyCNN(padding='same')
     print(f'Loading model from {weights_path}')
     model_weights = torch.load(weights_path, map_location=device)
@@ -51,7 +51,7 @@ def model_loading(weights_path='weights/gz21_huggingface/low-resolution/files/tr
     net.eval()
     return net
 
-#net = model_loading()
+net = model_loading()
 
 @torch.no_grad()
 def momentum_cnn(u, v, mask_u, mask_v):
