@@ -1,9 +1,10 @@
 using Flux: Conv, relu, Chain
 using Flux.Optimise: softplus
 
-function activation(x, precision_indices=range(3,4), min_value=0.0015)
-    x[:, :, precision_indices, :] .= softplus.(x[:, :, precision_indices, :]) .+ min_value
-    return x 
+function activation(x; precision_indices=3:4, min_value=0.0015)
+    out = copy(x)
+    out[:, :, precision_indices, :] .= softplus.(x[:, :, precision_indices, :]) .+ min_value
+    return out
 end
 
 function get_model(weight_path=nothing) 

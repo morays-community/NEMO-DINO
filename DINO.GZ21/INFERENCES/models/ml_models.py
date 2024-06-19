@@ -1,14 +1,8 @@
 import numpy as np
-import sys
 import torch
-import pickle
-import json
-import sys
-sys.path.append('gz21_ocean_momentum/src/')
 
-from gz21_ocean_momentum.models.models1 import FullyCNN
-import gz21_ocean_momentum.models.transforms as transforms
-import gz21_ocean_momentum.train.losses as loss_funcs
+from model_gz21_eophis import FullyCNN
+import models.transforms as transforms
 
 
 #       Utils 
@@ -36,13 +30,11 @@ def Is_None(*inputs):
     return any(item is None for item in inputs)
 
 
-# From https://zenodo.org/records/7663062
-u_scale=1/0.10278768092393875 # ~ 10
-v_scale=1/0.07726840674877167 # ~ 12
-world_radius_in_meters=6.371e6
-angle_to_meters=world_radius_in_meters*2*np.pi/360 
-Su_scale=0.004745704121887684/angle_to_meters # ~4e-8
-Sv_scale=0.004386111628264189/angle_to_meters # ~4e-8
+# From https://github.com/chzhangudel/Forpy_CNN_GZ21/blob/smartsim/testNN.py
+u_scale= 10
+v_scale= 10
+Su_scale= 1e-7
+Sv_scale= 1e-7
 
 #       Main Model Routines
 # ------------------------------
@@ -59,7 +51,7 @@ def model_loading(weights_path='weights/gz21_huggingface/low-resolution/files/tr
     net.eval()
     return net
 
-net = model_loading()
+#net = model_loading()
 
 @torch.no_grad()
 def momentum_cnn(u, v, mask_u, mask_v):
@@ -73,13 +65,14 @@ def momentum_cnn(u, v, mask_u, mask_v):
             u_slice, v_slice = torch.tensor(u_slice.astype(np.float32)), torch.tensor(v_slice.astype(np.float32))
             inputs = torch.stack([u_slice, v_slice])[None]
             r = net(inputs) # u, v -> s_x, s_y, std_x, std_y
-            Su_mu, Sv_mu, Su_std, Sv_std = r[0, 0], r[0, 1], r[0, 2], r[0, 3]
-            u_c = Su_scale * ( u_slice + Su_mu + np.sqrt(1/Su_std)*torch.randn_like(Su_std) ).numpy()
-            v_c = Sv_scale * ( v_slice + Sv_mu + np.sqrt(1/Sv_std)*torch.randn_like(Sv_std) ).numpy()
+            Su_mu, Sv_mu, Su_p, Sv_p = r[0, 0], r[0, 1], r[0, 2], r[0, 3]
+            u_c = Su_scale * ( Su_mu + np.sqrt(1/Su_p)*torch.randn_like(Su_p) ).numpy()
+            v_c = Sv_scale * ( Sv_mu + np.sqrt(1/Sv_p)*torch.randn_like(Sv_p) ).numpy()
             u[:,:,z] = u_c
             v[:,:,z] = v_c   
         return u*mask_u , v*mask_v
     
+#einops.rearrange([u, v], 'l i j k -> k  l i j')
 
 if __name__ == '__main__' : 
     u = np.random.rand(120, 100, 3).astype('float32')
