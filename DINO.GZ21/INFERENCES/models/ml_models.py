@@ -1,5 +1,5 @@
 import numpy as np
-import torch
+import torch, einops
 
 from model_gz21_eophis import FullyCNN
 import transforms as transforms
@@ -54,8 +54,10 @@ def model_loading(weights_path='../weights/gz21_huggingface/low-resolution/files
 net = model_loading()
 
 @torch.no_grad()
-def momentum_cnn(u, v, mask_u, mask_v):
+def momentum_cnn_old(u, v, mask_u, mask_v, sampling=True):
     """ Take as input u and v fields and return corrected fields using GZ (2021)  """
+    u = np.copy(u) # Avoid inplace modification
+    v = np.copy(v)
     if Is_None([u, v]):
         return None
     else:
@@ -66,22 +68,73 @@ def momentum_cnn(u, v, mask_u, mask_v):
             inputs = torch.stack([u_slice, v_slice])[None]
             r = net(inputs) # u, v -> s_x, s_y, std_x, std_y
             Su_mu, Sv_mu, Su_p, Sv_p = r[0, 0], r[0, 1], r[0, 2], r[0, 3]
-            u_c = Su_scale * ( Su_mu + np.sqrt(1/Su_p)*torch.randn_like(Su_p) ).numpy()
-            v_c = Sv_scale * ( Sv_mu + np.sqrt(1/Sv_p)*torch.randn_like(Sv_p) ).numpy()
-            u[:,:,z] = u_c
-            v[:,:,z] = v_c   
+            u[:,:,z] = Su_scale * ( Su_mu + np.sqrt(1/Su_p)*torch.randn_like(Su_p)*sampling ).numpy()
+            v[:,:,z] = Sv_scale * ( Sv_mu + np.sqrt(1/Sv_p)*torch.randn_like(Sv_p)*sampling ).numpy()
+        return u*mask_u , v*mask_v
+    
+@torch.no_grad()
+def momentum_cnn(u, v, mask_u, mask_v, sampling=True):
+    """ Take as input u and v fields and return corrected fields using GZ (2021)
+
+    Param :
+        u (i, j, k)
+        v (i, j, k)
+        mask_u (i j k)
+        mask_v (i j k)  
+        sampling (bool) : to add random noise or not
+    Out : 
+        Su (i j k)
+        Sv (i j k)
+    """
+    if Is_None([u, v]):
+        return None
+    else:
+        global net
+        inp = einops.rearrange([torch.tensor(u*u_scale),
+                                torch.tensor(v*v_scale)], 'c i j k -> k c i j')
+        r = net(inp)
+        Su_mu, Sv_mu, Su_p, Sv_p = r[:, 0], r[:, 1], r[:, 2], r[:, 3] # k i j
+        u = Su_scale * ( Su_mu + np.sqrt(1/Su_p)*torch.randn_like(Su_p)*sampling)
+        v = Sv_scale * ( Sv_mu + np.sqrt(1/Sv_p)*torch.randn_like(Sv_p)*sampling)
+        u = einops.rearrange(u, 'k i j -> i j k').numpy()
+        v = einops.rearrange(v, 'k i j -> i j k').numpy()
         return u*mask_u , v*mask_v
     
 #einops.rearrange([u, v], 'l i j k -> k  l i j')
 
 if __name__ == '__main__' : 
-    u = np.random.rand(120, 100, 3).astype('float32')
-    v = np.random.rand(120, 100, 3).astype('float32')
-    mask_u = np.ones((120, 100, 3)).astype('float32')
-    mask_v = np.ones((120, 100, 3)).astype('float32')
-    n_u, n_v = momentum_cnn(u, v, mask_u, mask_v)
+
+
+    #u = np.random.rand(120, 100, 3).astype('float32') *100
+    #v = np.random.rand(120, 100, 3).astype('float32') *100
+
+    
+    b, c, i, j = 1, 2, 10, 20
+    def function_mat_python(b, c, i, j) : 
+        return b*0.7 + c*0.1 + i*0.827 + j*0.193
+
+    def create_mat_python(b, c, i, j) : 
+        inp = torch.zeros((b,c, i ,j))
+        for bi in range(0,b):
+            for ci in range(0,c) :
+                for ii in range(0,i):
+                    for ji in range(0,j) :
+                        inp[bi, ci, ii, ji] = function_mat_python(bi,ci,ii,ji)
+        return inp
+
+    inp = create_mat_python(b,c,i,j)
+    
+    u = inp[:,0].permute(1,2,0).numpy()
+    v = inp[:,1].permute(1,2,0).numpy()
+    
+    mask_u = np.ones_like(u).astype('float32')
+    mask_v = np.ones_like(v).astype('float32')
+    n_u, n_v = momentum_cnn_old(u, v, mask_u, mask_v, sampling=False)
+
+    n_u_new, n_v_new = momentum_cnn(u, v, mask_u, mask_v, sampling=False)
     print(f'Returned n_u : {n_u.shape} n_v : {n_v.shape}')
+    
+
+    print('Max diff n_u', np.max(np.abs(n_u - n_u_new)),'- max diff n_v', np.max(np.abs(n_v - n_v_new)))
+
     print(f'Test successful')
-
-
-

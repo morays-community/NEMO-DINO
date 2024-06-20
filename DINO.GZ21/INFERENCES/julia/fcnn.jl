@@ -26,6 +26,26 @@ function get_model(weight_path=nothing)
     return model
 end
 
+function subgrid_forcing(u, v; u_scale=10.0, v_scale=10.0, Su_scale=1e-7, Sv_scale=1e-7, sampling=true)
+    """
+    parameters :
+        u (W, H, K) : zonal velocity
+        v (W, H, K) : meridional velocity
+        sampling (bool) : indicates if we add noise to the subgrid forcing. If False takes the MLE
+
+    return 
+        Su (W, H, K) : zonal subgrid_forcing
+        Sv (W, H, K) : meridional subgrid_forcing
+
+    Values from scale : https://github.com/chzhangudel/Forpy_CNN_GZ21/blob/smartsim/testNN.py
+    """
+    out = model(stack([u .* u_scale, v .* v_scale], dims=3)) #(w, h, 2, k) - Here we consider depth layers as batch as they are processed independently
+    out = activation(out)
+    Su, Sv, Spu, Spv = out[:,:,1,:], out[:,:,2,:], out[:,:,3,:], out[:,:,4,:]
+    Su = Su_scale * ( Su + sqrt.(1 ./Spu).*randn(size(Spu)) * sampling )
+    Sv = Sv_scale * ( Sv + sqrt.(1 ./Spv).*randn(size(Spv)) * sampling )
+    return Su, Sv
+end
 
 
 

@@ -7,11 +7,14 @@ py"""
 import torch 
 import torch.nn as nn
 import sys
-import ml_models
 
 b, c, i, j = 1, 2, 10, 20
 base = "/Users/emeunier/Desktop/NEMO-DINO/DINO.GZ21/INFERENCES/"
 random_mat = False
+
+sys.path.append(f'{base}/models/')
+import ml_models
+
 
 net = ml_models.model_loading(f"{base}/weights/gz21_huggingface/low-resolution/files/trained_model.pth")
 
@@ -28,7 +31,6 @@ else :
                 for ii in range(0,i):
                     for ji in range(0,j) :
                         inp[bi, ci, ii, ji] = function_mat_python(bi,ci,ii,ji)
-        sys.stdout.flush()
         return inp
 
     inp = create_mat_python(b,c,i,j)
@@ -52,7 +54,7 @@ b, c, i, j = py"b",py"c",py"i",py"j"
 random_mat = py"random_mat"
 
 
-model=get_model("$base/weights/gz21_huggingface/low-resolution/files/model_weights.jld2");
+model=get_model("$base/julia/model_weights.jld2");
 
 if random_mat
     inp_julia = py"inp"
@@ -82,8 +84,9 @@ end
 inp_julia = PermutedDimsArray(inp_julia, (3, 4, 2, 1)); # w h c b
 
 out_julia = activation(model(inp_julia)); 
+Su_julia, Sv_julia = subgrid_forcing(inp_julia[:,:,1,:], inp_julia[:,:,2,:]; sampling=false)
 
-out_julia = PermutedDimsArray(out_julia, (4, 3, 1, 2));
+out_julia = PermutedDimsArray(out_julia, (4, 3, 1, 2)); 
 
 out_torch = py"out_torch"
 @info("output", out_julia[1,1,1,1], out_julia[1,2,1,1], out_julia[1,3,1,1], out_julia[1,4,1,1])

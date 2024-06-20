@@ -1,7 +1,7 @@
 using Flux, JLD2, Statistics
-include("utils/fcnn.jl")
+include("fcnn.jl")
 
-model=get_model("weights/gz21_huggingface/low-resolution/files/model_weights.jld2")
+model=get_model("DINO.GZ21/INFERENCES/julia/model_weights.jld2")
 
 input = ones(Float32, 128, 128, 2, 10);
 
@@ -10,24 +10,5 @@ out = model(input);
 out = activation(out);
 print(mean(out, dims=(1,2,4)))
 
-u_scale, v_scale, Su_scale, Sv_scale = 10, 12, 4e-8, 4e-8
-
-function subgrid_forcing(u, v)
-    """
-    parameters :
-        u (W, H, K) : zonal velocity
-        v (W, H, K) : meridional velocity
-
-    return 
-        Su (W, H, K) : zonal subgrid_forcing
-        Sv (W, H, K) : meridional subgrid_forcing
-    """
-    out = model(stack([u .* u_scale, v .* v_scale], dims=3)) #(w, h, 2, k) - Here we consider depth layers as batch as they are processed independently
-    out = activation(out)
-    Su, Sv, Spu, Spv = out[:,:,1,:], out[:,:,2,:], out[:,:,3,:], out[:,:,4,:]
-    Su = Su_scale * ( Su + sqrt.(1 ./Spu).*randn(size(Spu)) )
-    Sv = Sv_scale * ( Sv + sqrt.(1 ./Spv).*randn(size(Spv)) )
-    return Su, Sv
-end
-
+u_scale, v_scale, Su_scale, Sv_scale = 10, 10, 1e-7, 1e-7
 
