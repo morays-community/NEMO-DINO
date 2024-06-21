@@ -1,0 +1,8 @@
+pyproject.toml
+src/gz21_cnn.py
+src/transforms.py
+src/gz21_ocean_momentum__Morays.egg-info/PKG-INFO
+src/gz21_ocean_momentum__Morays.egg-info/SOURCES.txt
+src/gz21_ocean_momentum__Morays.egg-info/dependency_links.txt
+src/gz21_ocean_momentum__Morays.egg-info/requires.txt
+src/gz21_ocean_momentum__Morays.egg-info/top_level.txt

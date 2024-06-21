@@ -7,8 +7,6 @@ Modified version of
 import torch
 from torch import nn
 
-from ipdb import set_trace
-
 # THIS IS THE MODEL USED IN THE FINAL PAPER
 class FullyCNN(nn.Sequential):
     """

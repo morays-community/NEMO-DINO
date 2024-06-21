@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools >= 61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+version = "0.3.0"
+
+name = "gz21_ocean_momentum__Morays"
+description= "GZ21 for Morays project inferences"
+requires-python = ">=3.9"
+
+dependencies = [
+    "einops",
+    "torch>=1.13.1",
+]
+
+authors = [
+  { name="Arthur Guillaumin", email="a.guillaumin@qmul.ac.uk" },
+  { name="Etienne Meunier", email="etienne.meunier@locean.ipsl.fr" },
+]
+
+maintainers = [
+  { name="Etienne Meunier", email="etienne.meunier@locean.ipsl.fr" },
+  { name="Ben Orchard", email="thefirstmuffinman@gmail.com" },
+  { name="Jack Atkinson", email="jack.atkinson1000@gmail.com" },
+]
+
+[project.urls]
+"Homepage" = "https://github.com/m2lines/GZ21_ocean_momentum"
+"Bug Tracker" = "https://github.com/m2lines/GZ21_ocean_momentum/issues"
+
