@@ -2,7 +2,7 @@ using Flux: Conv, relu, Chain
 using Flux.Optimise: softplus
 
 function activation(x; precision_indices=3:4, min_value=0.0015)
-    out = copy(x)
+    out = copy(x) # If we want to avoid inplace modification
     out[:, :, precision_indices, :] .= softplus.(x[:, :, precision_indices, :]) .+ min_value
     return out
 end
@@ -29,13 +29,13 @@ end
 function subgrid_forcing(u, v; u_scale=10.0, v_scale=10.0, Su_scale=1e-7, Sv_scale=1e-7, sampling=true)
     """
     parameters :
-        u (W, H, K) : zonal velocity
-        v (W, H, K) : meridional velocity
+        u (i, j, k) : zonal velocity
+        v (i, j, k) : meridional velocity
         sampling (bool) : indicates if we add noise to the subgrid forcing. If False takes the MLE
 
     return 
-        Su (W, H, K) : zonal subgrid_forcing
-        Sv (W, H, K) : meridional subgrid_forcing
+        Su (i, j, k) : zonal subgrid_forcing
+        Sv (i, j, k) : meridional subgrid_forcing
 
     Values from scale : https://github.com/chzhangudel/Forpy_CNN_GZ21/blob/smartsim/testNN.py
     """
