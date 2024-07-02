@@ -41,7 +41,7 @@ else:
 
 
 # Load model
-net = model_loading(padding='init_circular')
+net = model_loading(padding='init_zeros')
 # From https://github.com/chzhangudel/Forpy_CNN_GZ21/blob/smartsim/testNN.py
 u_scale= 10
 v_scale= 10

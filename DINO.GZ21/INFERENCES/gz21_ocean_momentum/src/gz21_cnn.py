@@ -48,11 +48,11 @@ class FullyCNN(nn.Sequential):
             padding_3 = 1
             padding_init = padding_5
             padding_init_mode = 'zeros'
-        elif padding == "init_circular" : 
+        elif padding == "init_zeros" : 
             padding_5 = 0
             padding_3 = 0
             padding_init = 10
-            padding_init_mode = 'circular'
+            padding_init_mode = 'zeros'
         else:
             raise ValueError("Unknow value for padding parameter.")
 
