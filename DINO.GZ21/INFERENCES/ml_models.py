@@ -1,7 +1,7 @@
 import numpy as np
 import torch, einops
 import sys
-sys.path.append('gz21_ocean_momentum/')
+sys.path.append('gz21_ocean_momentum/src')
 
 from gz21_cnn import FullyCNN
 import transforms as transforms
@@ -15,8 +15,8 @@ def Is_None(*inputs):
 
 
 @torch.no_grad()
-def model_loading(weights_path='weights/gz21_huggingface/low-resolution/files/trained_model.pth', device='cpu') :
-    net = FullyCNN(padding='same')
+def model_loading(weights_path='weights/gz21_huggingface/low-resolution/files/trained_model.pth', device='cpu', padding='init_circular') :
+    net = FullyCNN(padding=padding)
     try: # in-repo test or in local deployed config dir
         model_weights = torch.load('trained_model.pth', map_location=device)
     except:
@@ -41,7 +41,7 @@ else:
 
 
 # Load model
-net = model_loading()
+net = model_loading(padding='init_circular')
 # From https://github.com/chzhangudel/Forpy_CNN_GZ21/blob/smartsim/testNN.py
 u_scale= 10
 v_scale= 10
@@ -67,8 +67,8 @@ def momentum_cnn(u, v, mask_u, mask_v, sampling=True):
         return None
     else:
         global net, u_scale, v_scale, Su_scale, Sv_scale
-        inp = einops.rearrange( [torch.tensor(u_scale*u.astype(np.float32)),
-                                torch.tensor(v_scale*v.astype(np.float32))], 'c i j k -> k c i j' )
+        inp = einops.rearrange( [torch.tensor(u_scale*u.astype(np.float32)*mask_u),
+                                torch.tensor(v_scale*v.astype(np.float32)*mask_v)], 'c i j k -> k c i j' )
         r = net(inp)
         Su_mu, Sv_mu, Su_p, Sv_p = r[:, 0], r[:, 1], r[:, 2], r[:, 3] # k i j
         u = Su_scale * ( Su_mu + np.sqrt(1/Su_p)*torch.randn_like(Su_p)*sampling)
@@ -80,7 +80,7 @@ def momentum_cnn(u, v, mask_u, mask_v, sampling=True):
 
 if __name__ == '__main__' : 
 
-    b, c, i, j = 1, 2, 10, 20
+    b, c, i, j = 1, 2, 100, 200
     def function_mat_python(b, c, i, j) : 
         return b*0.7 + c*0.1 + i*0.827 + j*0.193
 

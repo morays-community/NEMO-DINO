@@ -41,15 +41,24 @@ class FullyCNN(nn.Sequential):
         if padding is None:
             padding_5 = 0
             padding_3 = 0
+            padding_init_mode = 'zeros'
+            padding_init = padding_5
         elif padding == "same":
             padding_5 = 2
             padding_3 = 1
+            padding_init = padding_5
+            padding_init_mode = 'zeros'
+        elif padding == "init_circular" : 
+            padding_5 = 0
+            padding_3 = 0
+            padding_init = 10
+            padding_init_mode = 'circular'
         else:
             raise ValueError("Unknow value for padding parameter.")
 
         self.n_in_channels = n_in_channels
         self.batch_norm = batch_norm
-        conv1 = torch.nn.Conv2d(n_in_channels, 128, 5, padding=padding_5)
+        conv1 = torch.nn.Conv2d(n_in_channels, 128, 5, padding=padding_init, padding_mode=padding_init_mode)
         block1 = self._make_subblock(conv1)
         conv2 = torch.nn.Conv2d(128, 64, 5, padding=padding_5)
         block2 = self._make_subblock(conv2)
