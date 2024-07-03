@@ -67,8 +67,8 @@ def momentum_cnn(u, v, mask_u, mask_v, sampling=True):
         return None
     else:
         global net, u_scale, v_scale, Su_scale, Sv_scale
-        inp = einops.rearrange( [torch.tensor(u_scale*u.astype(np.float32)*mask_u),
-                                torch.tensor(v_scale*v.astype(np.float32)*mask_v)], 'c i j k -> k c i j' )
+        inp = einops.rearrange( [torch.tensor(u_scale*u.astype(np.float32)*mask_u.astype(np.float32)),
+                                torch.tensor(v_scale*v.astype(np.float32)*mask_v.astype(np.float32))], 'c i j k -> k c i j' )
         r = net(inp)
         Su_mu, Sv_mu, Su_p, Sv_p = r[:, 0], r[:, 1], r[:, 2], r[:, 3] # k i j
         u = Su_scale * ( Su_mu + np.sqrt(1/Su_p)*torch.randn_like(Su_p)*sampling)
