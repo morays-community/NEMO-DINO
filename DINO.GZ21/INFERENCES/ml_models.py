@@ -26,6 +26,7 @@ def model_loading(weights_path='weights/gz21_huggingface/low-resolution/files/tr
     net.final_transformation = transformation
     net.load_state_dict(model_weights)
     net.eval()
+    net.to(device)
     return net
 
 
@@ -41,7 +42,7 @@ else:
 
 
 # Load model
-net = model_loading(padding='init_zeros')
+net = model_loading(padding='init_zeros' , device=device)
 # From https://github.com/chzhangudel/Forpy_CNN_GZ21/blob/smartsim/testNN.py
 u_scale= 10
 v_scale= 10
@@ -66,15 +67,23 @@ def momentum_cnn(u, v, mask_u, mask_v, sampling=True):
     if Is_None([u, v]):
         return None
     else:
-        global net, u_scale, v_scale, Su_scale, Sv_scale
-        inp = einops.rearrange( [torch.tensor(u_scale*u.astype(np.float32)*mask_u.astype(np.float32)),
-                                torch.tensor(v_scale*v.astype(np.float32)*mask_v.astype(np.float32))], 'c i j k -> k c i j' )
+        global net, u_scale, v_scale, Su_scale, Sv_scale, device
+        # pack inputs
+        inp = einops.rearrange( [ torch.tensor(u_scale*u.astype(np.float32)*mask_u.astype(np.float32)).to(device) ,
+                                  torch.tensor(v_scale*v.astype(np.float32)*mask_v.astype(np.float32)).to(device) ], 'c i j k -> k c i j' )
+        # preds
         r = net(inp)
         Su_mu, Sv_mu, Su_p, Sv_p = r[:, 0], r[:, 1], r[:, 2], r[:, 3] # k i j
-        u = Su_scale * ( Su_mu + np.sqrt(1/Su_p)*torch.randn_like(Su_p)*sampling)
-        v = Sv_scale * ( Sv_mu + np.sqrt(1/Sv_p)*torch.randn_like(Sv_p)*sampling)
+
+        # subgrid forcing terms
+        u = Su_scale * ( Su_mu + torch.sqrt(1/Su_p)*torch.randn_like(Su_p)*sampling)
+        v = Sv_scale * ( Sv_mu + torch.sqrt(1/Sv_p)*torch.randn_like(Sv_p)*sampling)
+        if device.type == 'cuda':
+            u = u.cpu()
+            v = v.cpu()
         u = einops.rearrange(u, 'k i j -> i j k').numpy()
         v = einops.rearrange(v, 'k i j -> i j k').numpy()
+
         return u*mask_u , v*mask_v
     
 
