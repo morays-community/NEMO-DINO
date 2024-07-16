@@ -41,9 +41,10 @@ def model_loading(weights_path='weights/gz21_huggingface/low-resolution/files/',
     net.final_transformation = transformation
     net.load_state_dict(model_weights)
     net.eval()
+    net.to(device)
     return net
 
-net = model_loading()
+net = model_loading(device=device)
 
 # prediction routine
 @torch.no_grad()
@@ -52,21 +53,32 @@ def momentum_cnn(u, v, mask_u, mask_v):
     if Is_None([u, v]):
         return None
     else:
-        global net
+        global net, device
         alpha = 0.000005
         for z in range(u.shape[2]):
+            # normalize
             normu, normv = np.std(u[:,:,z]), np.std(v[:,:,z])
             normu = 1.0 if normu == 0.0 else normu
             normv = 1.0 if normv == 0.0 else normv
             u_slice, v_slice = u[:,:,z] / normu, v[:,:,z] / normv
-            u_slice, v_slice = torch.tensor(u_slice.astype(np.float32)), torch.tensor(v_slice.astype(np.float32))
+
+            # convert and pack inputs
+            u_slice, v_slice = torch.tensor(u_slice.astype(np.float32)).to(device), torch.tensor(v_slice.astype(np.float32)).to(device)
             inputs = torch.stack([u_slice, v_slice])[None]
+
+            # preds
             r = net(inputs) # u, v -> s_x, s_y, std_x, std_y
             Su_mu, Sv_mu, Su_std, Sv_std = r[0, 0], r[0, 1], r[0, 2], r[0, 3]
-            fu = ( Su_mu + Su_std*torch.randn_like(Su_std) ).numpy()
-            fv = ( Sv_mu + Su_std*torch.randn_like(Sv_std) ).numpy()
-            u[:,:,z] = fu * alpha
-            v[:,:,z] = fv * alpha
+
+            # subgrid forcing terms
+            fu = Su_mu + Su_std*torch.randn_like(Su_std) 
+            fv = Sv_mu + Su_std*torch.randn_like(Sv_std)
+            if device.type == 'cuda':
+                fu = fu.cpu()
+                fv = fv.cpu()
+            u[:,:,z] = fu.numpy() * alpha
+            v[:,:,z] = fv.numpy() * alpha
+
         return u*mask_u , v*mask_v
     
 
