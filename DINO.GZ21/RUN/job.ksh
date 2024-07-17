@@ -50,5 +50,11 @@ else
         echo "preproduction successful"
 fi
 
+# write multi-prog file
+touch run_file
+rm run_file
+echo 0 ./nemo >> run_file
+echo 1 python3 ./main.py >> run_file
+
 # run coupled NEMO-Python
-mpirun  -np 1 ./nemo : -np 1 python3 ./main.py --exec prod
+time srun --multi-prog ./run_file
