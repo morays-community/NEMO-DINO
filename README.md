@@ -18,7 +18,7 @@
 
 ### Python
 
-- Eophis version : [v0.9.2](https://github.com/alexis-barge/eophis/tree/v0.9.2)
+- Eophis version : [v1.0.0](https://github.com/alexis-barge/eophis/tree/v1.0.0)
 
 
 ### Run
