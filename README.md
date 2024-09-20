@@ -11,7 +11,7 @@
 
 ### Compilation
 
-- NEMO version : [v4.2.1](https://forge.nemo-ocean.eu/nemo/nemo/-/releases/4.2.1) patched with [morays](https://github.com/morays-community/morays-doc/tree/main/nemo_src) and local `CONFIG/my_src` sources.
+- NEMO version : [v4.2.1](https://forge.nemo-ocean.eu/nemo/nemo/-/releases/4.2.1) patched with [morays](https://github.com/morays-community/morays-doc/tree/main/nemo_patch/NEMO_v4.2.1) and local `CONFIG/my_src` sources.
 
 - Code Compilation manager : none, use standard `makenemo` script
 
