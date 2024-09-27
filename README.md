@@ -1,5 +1,7 @@
 # DINO
 
+[![DOI](https://zenodo.org/badge/776021044.svg)](https://doi.org/10.5281/zenodo.13851911)
+
 ## Context and Motivation
 
 [A DIabatic NeverwOrld2](https://github.com/vopikamm/DINO) coupled with external Python models.
