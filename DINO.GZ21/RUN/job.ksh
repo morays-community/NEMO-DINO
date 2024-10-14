@@ -11,6 +11,13 @@
 #SBATCH --account=cli@cpu
 #SBATCH --qos=qos_cpu-dev # Queue test
 
+# Process distribution
+NPROC_NEMO=1
+NPROC_PYTHON=1
+
+## -------------------------------------------------------
+##   End of user-defined section - modify with knowledge
+## -------------------------------------------------------
 # Load Environnment
 source ~/.bash_profile
 
@@ -50,5 +57,11 @@ else
         echo "preproduction successful"
 fi
 
+# write multi-prog file
+touch run_file
+rm run_file
+echo 0-$((NPROCS_NEMO - 1)) ./nemo >> run_file
+echo ${NPROCS_NEMO}-$((NPROCS_NEMO + NPROCS_PYTHON - 1)) python3 ./main.py >> run_file
+
 # run coupled NEMO-Python
-mpirun  -np 1 ./nemo : -np 1 python3 ./main.py --exec prod
+time srun --multi-prog ./run_file
