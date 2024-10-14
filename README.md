@@ -5,7 +5,7 @@
 [A DIabatic NeverwOrld2](https://github.com/vopikamm/DINO) coupled with external Python models.
 
 #### Variations
-- GZ21 : DINO coupled with [Guillaumin and Zanna, 2021](https://doi.org/10.1029/2021MS002534) ML model 
+- **GZ21** : DINO coupled with [Guillaumin and Zanna, 2021](https://doi.org/10.1029/2021MS002534) ML model 
 
 ## Requirements
 
@@ -19,7 +19,12 @@
 ### Python
 
 - Eophis version : [v1.0.0](https://github.com/alexis-barge/eophis/tree/v1.0.0)
-
+- **GZ21** dependencies:
+  ```bash
+  git submodule update --init --recursive
+  cd DINO.GZ21/INFERENCES/gz21_ocean_momentum/
+  pip install -e .
+  ```
 
 ### Run
 
