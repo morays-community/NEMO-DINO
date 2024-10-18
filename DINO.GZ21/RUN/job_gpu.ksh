@@ -61,8 +61,8 @@ fi
 # write multi-prog file
 touch run_file
 rm run_file
-echo 0-$((NPROCS_NEMO - 1)) ./nemo >> run_file
-echo ${NPROCS_NEMO}-$((NPROCS_NEMO + NPROCS_PYTHON - 1)) python3 ./main.py >> run_file
+echo 0-$((NPROC_NEMO - 1)) ./nemo >> run_file
+echo ${NPROC_NEMO}-$((NPROC_NEMO + NPROC_PYTHON - 1)) python3 ./main.py >> run_file
 
 # run coupled NEMO-Python
 time srun --multi-prog ./run_file
