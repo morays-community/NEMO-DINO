@@ -130,7 +130,7 @@ CONTAINS
 902   IF( ios /= 0 )   CALL ctl_nam ( ios , 'namusr_def in configuration namelist' )
       !
       !
-      WRITE( numond, namusr_def )
+      IF(lwm) WRITE( numond, namusr_def )
       !
       cd_cfg = 'BASIN'             ! name & resolution (not used)
       kk_cfg = rn_e1_deg
