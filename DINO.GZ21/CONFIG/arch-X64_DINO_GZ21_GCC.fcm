@@ -40,7 +40,7 @@
 %OASIS_HOME          /lustre/fswork/projects/rech/cli/udp79td/local_libs/oasis3-mct_5.0/BLD
 
 %NCDF_INC            -I${NETCDF_C_ROOT}/include -I${NETCDF_FORTRAN_ROOT}/include -I${HDF5_ROOT}/include
-%NCDF_LIB            -L${NETCDF_C_ROOT}/lib -lnetcdf -L${NETCDF_FORTRAN_ROOT}/lib -lnetcdff
+%NCDF_LIB            -L${NETCDF_C_ROOT}/lib -lnetcdf -L${NETCDF_FORTRAN_ROOT}/lib -lnetcdff -L${HDF5_ROOT}/lib -lhdf5_hl -lhdf5 -lz
 %XIOS_INC            -I%XIOS_HOME/inc 
 %XIOS_LIB            -L%XIOS_HOME/lib -lxios -lstdc++
 %OASIS_INC           -I%OASIS_HOME/include -I%OASIS_HOME/build-shared/lib/cbindings
@@ -52,7 +52,7 @@
 %FFLAGS              %FCFLAGS
 %LD                  mpif90
 %LDFLAGS             
-%FPPFLAGS            -P -C -traditional
+%FPPFLAGS            -P -traditional
 %AR                  ar
 %ARFLAGS             rs
 %MK                  gmake
