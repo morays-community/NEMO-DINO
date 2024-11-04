@@ -38,16 +38,17 @@
 #
 %XIOS_HOME           /lustre/fswork/projects/rech/cli/udp79td/local_libs/xios_trunk_oasis_5.0
 %OASIS_HOME          /lustre/fswork/projects/rech/cli/udp79td/local_libs/oasis3-mct_5.0/BLD
+%HDF5_HOME	     ${HDF5_ROOT}
 
-%NCDF_INC            -I${NETCDF_C_ROOT}/include -I${NETCDF_FORTRAN_ROOT}/include -I${HDF5_ROOT}/include
-%NCDF_LIB            -L${NETCDF_C_ROOT}/lib -lnetcdf -L${NETCDF_FORTRAN_ROOT}/lib -lnetcdff -L${HDF5_ROOT}/lib -lhdf5_hl -lhdf5 -lz
+%NCDF_INC            -I${NETCDF_C_ROOT}/include -I${NETCDF_FORTRAN_ROOT}/include -I%HDF5_HOME/include
+%NCDF_LIB            -L${NETCDF_C_ROOT}/lib -lnetcdf -L${NETCDF_FORTRAN_ROOT}/lib -lnetcdff -L%HDF5_HOME/lib -Wl,-rpath,%HDF5_HOME/lib -lhdf5_hl -lhdf5 -lz
 %XIOS_INC            -I%XIOS_HOME/inc 
 %XIOS_LIB            -L%XIOS_HOME/lib -lxios -lstdc++
 %OASIS_INC           -I%OASIS_HOME/include -I%OASIS_HOME/build-shared/lib/cbindings
 %OASIS_LIB           -L%OASIS_HOME/lib -loasis.cbind -lpsmile.MPI1 -lmct -lmpeu -lscrip
 
 %CPP	             cpp -Dkey_nosignedzero
-%FC                  mpif90 -c -cpp
+%FC                  mpif90
 %FCFLAGS             -fdefault-real-8 -O3 -march=native -funroll-all-loops -fcray-pointer -ffree-line-length-none -fallow-argument-mismatch
 %FFLAGS              %FCFLAGS
 %LD                  mpif90
@@ -59,5 +60,5 @@
 %USER_INC            %XIOS_INC %OASIS_INC %NCDF_INC
 %USER_LIB            %XIOS_LIB %OASIS_LIB %NCDF_LIB
 
-%CC                  cc
+%CC                  gcc
 %CFLAGS              -O0
