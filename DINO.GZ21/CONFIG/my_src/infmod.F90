@@ -28,7 +28,8 @@ MODULE infmod
    PUBLIC inf_alloc          ! function called in inferences_init 
    PUBLIC inf_dealloc        ! function called in inferences_final
    PUBLIC inferences_init    ! routine called in nemogcm.F90
-   PUBLIC inferences         ! routine called in stpmlf.F90
+   PUBLIC inferences_send    ! routine called in stpmlf.F90
+   PUBLIC inferences_rcv     ! routine called in stpmlf.F90
    PUBLIC inferences_final   ! routine called in nemogcm.F90
 
    INTEGER, PARAMETER ::   jps_ssu = 1    ! u surface velocity
@@ -198,24 +199,22 @@ CONTAINS
    END SUBROUTINE inferences_init
 
 
-   SUBROUTINE inferences( kt, Kbb, Kmm, puu, pvv, Krhs )
+   SUBROUTINE inferences_send( kt, Kbb, puu, pvv )
       !!----------------------------------------------------------------------
       !!             ***  ROUTINE inferences  ***
       !!
-      !! ** Purpose :   update the ocean data with the ML based models
+      !! ** Purpose :   send surface velocity fields toward Python script
       !!
       !! ** Method  :   *  
       !!                * 
       !!----------------------------------------------------------------------
       INTEGER, INTENT(in)                                 ::  kt             ! ocean time step
-      INTEGER, INTENT(in)                                 ::  Kbb, Kmm, Krhs ! ocean time level indices
+      INTEGER, INTENT(in)                                 ::  Kbb            ! ocean time level indices
       REAL(wp), DIMENSION(jpi,jpj,jpk,jpt), INTENT(inout) ::  puu, pvv       ! ocean horizontal velocities
       !
       INTEGER :: isec, info, jn                       ! local integer
       REAL(wp), DIMENSION(jpi,jpj,jpk)   ::  zdata    ! sending buffer
       !!----------------------------------------------------------------------
-      !
-      IF( ln_timing )   CALL timing_start('inferences')
       !
       isec = ( kt - nit000 ) * NINT( rn_Dt )       ! Date of exchange 
       info = OASIS_idle
@@ -252,7 +251,30 @@ CONTAINS
          ENDIF
       END DO
       !
-      ! .... some external operations ....
+   END SUBROUTINE inferences_send
+
+
+   SUBROUTINE inferences_rcv( kt, puu, pvv, Krhs )
+      !!----------------------------------------------------------------------
+      !!             ***  ROUTINE inferences  ***
+      !!
+      !! ** Purpose :   get forcing fields from Python script, add it to RHS
+      !!
+      !! ** Method  :   *
+      !!                *
+      !!----------------------------------------------------------------------
+      INTEGER, INTENT(in)                                 ::  kt             ! ocean time step
+      INTEGER, INTENT(in)                                 ::  Krhs           ! ocean time level indices
+      REAL(wp), DIMENSION(jpi,jpj,jpk,jpt), INTENT(inout) ::  puu, pvv       ! ocean horizontal velocities
+      !
+      INTEGER :: isec, info, jn                       ! local integer
+      REAL(wp), DIMENSION(jpi,jpj,jpk)   ::  zdata    ! sending buffer
+      !!----------------------------------------------------------------------
+      !
+      isec = ( kt - nit000 ) * NINT( rn_Dt )       ! Date of exchange
+      info = OASIS_idle
+      !
+      IF( ln_timing )   CALL timing_start('inferences')
       !
       ! ==========================
       !   Proceed all receptions
@@ -282,7 +304,7 @@ CONTAINS
       !
       IF( ln_timing )   CALL timing_stop('inferences')
       !
-   END SUBROUTINE inferences
+   END SUBROUTINE inferences_rcv
 
 
    SUBROUTINE inferences_final
